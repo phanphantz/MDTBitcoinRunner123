@@ -106,6 +106,7 @@ public class PlayerManager : MonoBehaviour
 
 	void Start()
 	{
+		Time.timeScale = 2f;
 		instances++;
 
 		if (instances > 1)

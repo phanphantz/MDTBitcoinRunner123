@@ -107,15 +107,15 @@ public class PlayerManager : MonoBehaviour
 	void Start()
 	{
 		instances++;
+		WarnAboutInstances();
+	}
 
+	void WarnAboutInstances()
+	{
 		if (instances > 1)
-		{
 			Debug.LogWarning("There are more than one PlayerManager");
-		}
 		else
-		{
 			_instance = this;
-		}
 	}
 
 	void Update()
@@ -124,7 +124,10 @@ public class PlayerManager : MonoBehaviour
 		{
 			distanceToMax = transform.position.y - minY;
 			distanceToMin = maxY - transform.position.y;
+			OnMovingForward();
+			transform.position += Vector3.up * speed * 2 * Time.deltaTime;
 
+<<<<<<< HEAD
 			if (movingUpward)
 			{
 				speed += Time.deltaTime * 1500;
@@ -132,42 +135,7 @@ public class PlayerManager : MonoBehaviour
 				if (distanceToMin < safetyZoneEdge)
 				{
 					newSpeed = maxVerticalSpeed * (maxY - transform.position.y) / safetyZoneEdge;
-
-					if (newSpeed < speed)
-						speed = newSpeed;
-				}
-				else if (distanceToMax < safetyZoneEdge)
-				{
-					newSpeed = 1500 * (minY - transform.position.y) / safetyZoneEdge;
-
-					if (newSpeed > speed)
-						speed = newSpeed;
-				}
-
-				movingUpward = false;
-			}
-			else
-			{
-				speed -= Time.deltaTime * maxVerticalSpeed;
-
-				if (distanceToMax < safetyZoneEdge)
-				{
-					newSpeed = maxVerticalSpeed * (minY - transform.position.y) / safetyZoneEdge;
-
-					if (newSpeed > speed)
-						speed = newSpeed;
-				}
-				else if (distanceToMin < safetyZoneEdge)
-				{
-					newSpeed = maxVerticalSpeed * (maxY - transform.position.y) / safetyZoneEdge;
-
-					if (newSpeed < speed)
-						speed = newSpeed;
-				}
-			}
-
-			transform.position += Vector3.up * speed * 2 * Time.deltaTime;
-
+=======
 			UpdateAnimatorParameters();
 		}
 		else if (isFalling)
@@ -179,18 +147,95 @@ public class PlayerManager : MonoBehaviour
 			speed = 0;
 		}
 	}
+>>>>>>> a437020 (REFACTOR: PlayerManager)
+
+	void OnMovingForward()
+	{
+		if (movingUpward)
+		{
+			speed += Time.deltaTime * 300;
+			ChangeSpeed();
+			movingUpward = false;
+		}
+		else
+		{
+			speed -= Time.deltaTime * maxVerticalSpeed;
+
+			if (distanceToMax < safetyZoneEdge)
+			{
+				newSpeed = maxVerticalSpeed * (minY - transform.position.y) / safetyZoneEdge;
+
+				if (newSpeed > speed)
+					speed = newSpeed;
+			}
+			else if (distanceToMin < safetyZoneEdge)
+			{
+				newSpeed = maxVerticalSpeed * (maxY - transform.position.y) / safetyZoneEdge;
+
+				if (newSpeed < speed)
+					speed = newSpeed;
+			}
+		}
+	}
+
+	void ChangeSpeed()
+	{
+		if (distanceToMin < safetyZoneEdge)
+		{
+			newSpeed = maxVerticalSpeed * (maxY - transform.position.y) / safetyZoneEdge;
+
+			if (newSpeed < speed)
+				speed = newSpeed;
+		}
+		else if (distanceToMax < safetyZoneEdge)
+		{
+			newSpeed = 1500 * (minY - transform.position.y) / safetyZoneEdge;
+
+			if (newSpeed > speed)
+				speed = newSpeed;
+		}
+	}
 
 	void UpdateAnimatorParameters()
 	{
 		characterAnimator.SetFloat("CharacterSpeed", speed);
 
-		characterAnimator.SetBool("OnTheCar", isOnTheCar);
-		characterAnimator.SetBool("OnTheBus", isOnTheBus);
+		SetCharacterAnimatorBool("OnTheCar", isOnTheCar);
+		SetCharacterAnimatorBool("OnTheBus", isOnTheBus);
 
 		if (isOnTheBus || isOnTheCar)
 		{
 			characterAnimator.enabled = true;
 		}
+	}
+
+	void SetCharacterAnimatorBool(string parameterName, bool value)
+	{
+		characterAnimator.SetBool(parameterName, value);
+	}
+	
+	void Crash()
+	{
+		crashed = true;
+
+		SetCharacterAnimatorBool("Crashed", crashed);
+
+		speed = 0;
+		isFalling = false;
+
+		ParticleSystem.EmissionModule smokeEmissionModule = smokeParticle.emission;
+		smokeEmissionModule.enabled = true;
+
+		LevelSpawnManager.Instance.StartCoroutine("StopScrolling", 0.5f);
+		StartCoroutine(FallEffects());
+
+		StartCoroutine(MoveToPosition(transform, new Vector3(xPos, minY, transform.position.z), 0.65f, false));
+	}
+
+	void SetRendererAndColliderDisabled(Collider other)
+	{
+		other.GetComponent<Renderer>().enabled = false;
+		other.GetComponent<Collider>().enabled = false;
 	}
 
 	void OnTriggerEnter(Collider other)
@@ -202,9 +247,7 @@ public class PlayerManager : MonoBehaviour
 		}
 		else if (other.tag == "Coin" && !disableCoinTrigger)
 		{
-			other.GetComponent<Renderer>().enabled = false;
-			other.GetComponent<Collider>().enabled = false;
-
+			SetRendererAndColliderDisabled(other);
 			other.transform.Find("CoinParticle").gameObject.GetComponent<ParticleSystem>().Play();
 			CoinInfo info = other.transform.gameObject.GetComponent<CoinInfo>();
 			if (info != null)
@@ -243,12 +286,10 @@ public class PlayerManager : MonoBehaviour
 				}
 			}
 
-			AudioSource.PlayClipAtPoint(wordsAudioEffect, Vector3.up, SoundManager.Instance.audioVolume);
-
+			PlaySoundClip(wordsAudioEffect);
 			PreferencesManager.Instance.SetCompletedWord(completedWord);
 
-			other.GetComponent<Renderer>().enabled = false;
-			other.GetComponent<Collider>().enabled = false;
+			SetRendererAndColliderDisabled(other);
 		}
 		else if (other.tag == "Enemy" && !disableEnemyTrigger)
 		{
@@ -316,12 +357,17 @@ public class PlayerManager : MonoBehaviour
 		}
 	}
 
+	void PlaySoundClip(AudioClip clip)
+	{
+		AudioSource.PlayClipAtPoint(clip, Vector3.up, SoundManager.Instance.audioVolume);
+	}
+
 	public void ActivateSecondChance()
 	{
 		if (playerControllerEnabled)
 		{
 			SecondChanceCollected();
-			AudioSource.PlayClipAtPoint(secondChanceAudioEffect, Vector3.up, SoundManager.Instance.audioVolume);
+			PlaySoundClip(secondChanceAudioEffect);
 		}
 	}
 
@@ -330,7 +376,7 @@ public class PlayerManager : MonoBehaviour
 		if (playerControllerEnabled)
 		{
 			StartCoroutine(LaunchObstacleBlaster());
-			AudioSource.PlayClipAtPoint(obstacleBlasterAudioEffect, Vector3.up, SoundManager.Instance.audioVolume);
+			PlaySoundClip(obstacleBlasterAudioEffect);
 		}
 	}
 
@@ -341,25 +387,7 @@ public class PlayerManager : MonoBehaviour
 			parent.transform.parent.gameObject.GetComponent<Enemy>().TargetHit(true);
 		}
 	}
-
-	void Crash()
-	{
-		crashed = true;
-
-		characterAnimator.SetBool("Crashed", crashed);
-
-		speed = 0;
-		isFalling = false;
-
-		ParticleSystem.EmissionModule smokeEmissionModule = smokeParticle.emission;
-		smokeEmissionModule.enabled = true;
-
-		LevelSpawnManager.Instance.StartCoroutine("StopScrolling", 0.5f);
-		StartCoroutine(FallEffects());
-
-		StartCoroutine(MoveToPosition(transform, new Vector3(xPos, minY, transform.position.z), 0.65f, false));
-	}
-
+	
 	IEnumerator FallEffects()
 	{
 		yield return new WaitForSeconds(0.3f);
@@ -777,7 +805,7 @@ public class PlayerManager : MonoBehaviour
 			movingUpward = false;
 			secondChancePowerupEnabled = false;
 
-			characterAnimator.SetBool("Crashed", crashed);
+			SetCharacterAnimatorBool("Crashed", crashed);
 		}
 
 		yield return new WaitForEndOfFrame();
@@ -802,7 +830,7 @@ public class PlayerManager : MonoBehaviour
 
 		speed = 0;
 		crashed = false;
-		characterAnimator.SetBool("Crashed", crashed);
+		SetCharacterAnimatorBool("Crashed", crashed);
 		paused = false;
 		movingUpward = false;
 		canCrash = true;

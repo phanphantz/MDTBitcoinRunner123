@@ -127,7 +127,7 @@ public class PlayerManager : MonoBehaviour
 
 			if (movingUpward)
 			{
-				speed += Time.deltaTime * 1500;
+				speed += Time.deltaTime * 300;
 
 				if (distanceToMin < safetyZoneEdge)
 				{

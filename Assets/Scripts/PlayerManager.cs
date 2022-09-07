@@ -126,16 +126,6 @@ public class PlayerManager : MonoBehaviour
 			distanceToMin = maxY - transform.position.y;
 			OnMovingForward();
 			transform.position += Vector3.up * speed * 2 * Time.deltaTime;
-
-<<<<<<< HEAD
-			if (movingUpward)
-			{
-				speed += Time.deltaTime * 1500;
-
-				if (distanceToMin < safetyZoneEdge)
-				{
-					newSpeed = maxVerticalSpeed * (maxY - transform.position.y) / safetyZoneEdge;
-=======
 			UpdateAnimatorParameters();
 		}
 		else if (isFalling)
@@ -147,7 +137,6 @@ public class PlayerManager : MonoBehaviour
 			speed = 0;
 		}
 	}
->>>>>>> a437020 (REFACTOR: PlayerManager)
 
 	void OnMovingForward()
 	{

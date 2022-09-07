@@ -142,7 +142,7 @@ public class PlayerManager : MonoBehaviour
 	{
 		if (movingUpward)
 		{
-			speed += Time.deltaTime * 300;
+			speed += Time.deltaTime * 1500;
 			ChangeSpeed();
 			movingUpward = false;
 		}

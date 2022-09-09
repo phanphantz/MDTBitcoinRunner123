@@ -23,9 +23,7 @@ public class InputManager : MonoBehaviour
 	private void ListenForScreenCapture()
     {
         if (Input.GetKey(KeyCode.Z))
-        {
             StartCoroutine(CaptureScreenshot());
-        }
     }
 
     private void ListenForJump()
@@ -39,10 +37,7 @@ public class InputManager : MonoBehaviour
 	private void ListenForDash()
 	{
 		if (Input.GetKeyDown(KeyCode.LeftShift))
-        {
             Dash();
-        }
-
     }
 
     private static void Dash()
@@ -66,46 +61,52 @@ public class InputManager : MonoBehaviour
     void GetClicks()
     {
         if (Input.GetMouseButtonDown(0))
-            TryMoveUp(Input.mousePosition);
+            TryMoveUpByInput(Input.mousePosition);
     }
 
-    void TryMoveUp(Vector3 inputPosition)
+    void TryMoveUpByInput(Vector3 inputPosition)
     {
         ray = Camera.main.ScreenPointToRay(inputPosition);
+        TryMoveUpIfNotBlocked();
+    }
 
+    private void TryMoveUpIfNotBlocked()
+    {
         if (!Physics.Raycast(ray, out hit, Mathf.Infinity, mask))
-        {
-            if (IsShouldMoveUp())
-                PlayerManager.Instance.MoveUp();
-        }
+            TryMoveUp();
+    }
+
+    private static void TryMoveUp()
+    {
+        if (IsShouldMoveUp())
+            PlayerManager.Instance.MoveUp();
     }
 
     private static bool IsShouldMoveUp()
     {
         return (PlayerManager.Instance.transform.position.y < 50
-                    || PlayerManager.Instance.isOnTheCar
-                    || PlayerManager.Instance.isOnTheBus
-                    || PlayerManager.Instance.Crashed())
-                        && !UIManager.Instance.isPausedOrFinished;
+		|| PlayerManager.Instance.isOnTheCar
+		|| PlayerManager.Instance.isOnTheBus
+		|| PlayerManager.Instance.Crashed())
+		&& !UIManager.Instance.isPausedOrFinished;
     }
 
     void GetTouches()
     {
         foreach (Touch touch in Input.touches)
-        {
-            if (touch.phase == TouchPhase.Began && touch.phase != TouchPhase.Canceled)
-            {
-               TryMoveUp(touch.position);
-            }
-        }
+            TryMoveUpByTouch(touch);
     }
 
-    // void OnTap(TapGesture gesture)
-    // {
-    // 	if ((PlayerManager.Instance.transform.position.y < -22 || PlayerManager.Instance.isOnTheCar || PlayerManager.Instance.isOnTheBus || PlayerManager.Instance.Crashed())
-    // 	&& !UIManager.Instance.isPausedOrFinished)
-    // 	{
-    // 		PlayerManager.Instance.MoveUp();
-    // 	}
-    // }
+    private void TryMoveUpByTouch(Touch touch)
+    {
+        if (IsTouchValid(touch))
+            TryMoveUpByInput(touch.position);
+    }
+
+	bool IsTouchValid(Touch touch)
+	{
+		return touch.phase == TouchPhase.Began 
+		&& touch.phase != TouchPhase.Canceled;
+	}
+
 }

@@ -117,50 +117,71 @@ public class LevelSpawnManager : MonoBehaviour
 		foregroundScrollSpeed = backgroundScrollSpeed * 8;
 	}
 
-	void ScrollLevel()
+	public void ScrollLevelForSeconds(float targetTime)
 	{
-		if (canModifySpeed)
-		{
-			scrollSpeed = defaultScrollSpeed + ((distance / maxScrollSpeedDist) * (maxScrollSpeed - defaultScrollSpeed));
-		}
-
-		CalculateScrollSpeeds();
-
-		for (int i = 0; i < activeElements.Count; i++)
-		{
-			switch (activeElements[i].tag)
-			{
-				case "CloudLayer":
-					activeElements[i].transform.position -= Vector3.right * clodScrollSpeed * Time.deltaTime;
-					break;
-
-				case "CityBackgroundLayer":
-					activeElements[i].transform.position -= Vector3.right * backgroundScrollSpeed * Time.deltaTime;
-					break;
-
-				case "CityLayer":
-					activeElements[i].transform.position -= Vector3.right * middlegroundScrollSpeed * Time.deltaTime;
-					break;
-
-				case "ForegroundLayer":
-				case "Obstacles":
-				case "Particle":
-					activeElements[i].transform.position -= Vector3.right * foregroundScrollSpeed * Time.deltaTime;
-					break;
-			}
-		}
-
-		if (scrollStartTriggers)
-		{
-			startTriggers.transform.position -= Vector3.right * foregroundScrollSpeed * Time.deltaTime;
-		}
-
-		scrolling.x = scrollSpeed;
-
-		road.material.mainTextureOffset += scrolling * Time.deltaTime;
+		StartCoroutine(ScrollRoutine(targetTime));
 	}
 
-	void ClearMap()
+	IEnumerator ScrollRoutine(float targetTime)
+	{
+		var currentTime = 0f;
+		while(currentTime < targetTime)
+		{
+			ScrollLevel();
+			yield return new WaitForEndOfFrame();
+			currentTime += Time.deltaTime;
+		}
+	}
+
+	public void ScrollLevel()
+    {
+        if (canModifySpeed)
+        {
+            scrollSpeed = defaultScrollSpeed + ((distance / maxScrollSpeedDist) * (maxScrollSpeed - defaultScrollSpeed));
+        }
+
+        CalculateScrollSpeeds();
+
+        MoveActiveElements();
+
+        if (scrollStartTriggers)
+        {
+            startTriggers.transform.position -= Vector3.right * foregroundScrollSpeed * Time.deltaTime;
+        }
+
+        scrolling.x = scrollSpeed;
+
+        road.material.mainTextureOffset += scrolling * Time.deltaTime;
+    }
+
+    private void MoveActiveElements()
+    {
+        for (int i = 0; i < activeElements.Count; i++)
+        {
+            switch (activeElements[i].tag)
+            {
+                case "CloudLayer":
+                    activeElements[i].transform.position -= Vector3.right * clodScrollSpeed * Time.deltaTime;
+                    break;
+
+                case "CityBackgroundLayer":
+                    activeElements[i].transform.position -= Vector3.right * backgroundScrollSpeed * Time.deltaTime;
+                    break;
+
+                case "CityLayer":
+                    activeElements[i].transform.position -= Vector3.right * middlegroundScrollSpeed * Time.deltaTime;
+                    break;
+
+                case "ForegroundLayer":
+                case "Obstacles":
+                case "Particle":
+                    activeElements[i].transform.position -= Vector3.right * foregroundScrollSpeed * Time.deltaTime;
+                    break;
+            }
+        }
+    }
+
+    void ClearMap()
 	{
 		StopAllCoroutines();
 

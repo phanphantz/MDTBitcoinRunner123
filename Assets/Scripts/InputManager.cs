@@ -13,19 +13,43 @@ public class InputManager : MonoBehaviour
 	Transform button;
 
 	void Update()
+    {
+        ListenForScreenCapture();
+        ListenForJump();
+		ListenForDash();
+    }
+
+	private void ListenForScreenCapture()
+    {
+        if (Input.GetKey(KeyCode.Z))
+        {
+            StartCoroutine(CaptureScreenshot());
+        }
+    }
+
+    private void ListenForJump()
+    {
+        if (useTouch)
+            GetTouches();
+        else
+            GetClicks();
+    }
+
+	private void ListenForDash()
 	{
-		if (Input.GetKey(KeyCode.Z))
-		{
-			StartCoroutine(CaptureScreenshot());
-		}
+		if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            Dash();
+        }
 
-		if (useTouch)
-			GetTouches();
-		else
-			GetClicks();
-	}
+    }
 
-	IEnumerator CaptureScreenshot()
+    private static void Dash()
+    {
+        LevelSpawnManager.Instance.ScrollLevelForSeconds(0.5f);
+    }
+
+    IEnumerator CaptureScreenshot()
 	{
 		string filename = GetFileName(Screen.width, Screen.height);
 		Debug.LogError("Screenshot saved to " + filename);

@@ -7,6 +7,7 @@ public class DailyWordManager : MonoBehaviour
 	static DailyWordManager _instance;
 	static int instances = 0;
 	public bool resetDictionary = false;
+	[SerializeField] LetterData[] letters;
 
 	public static DailyWordManager Instance
 	{
@@ -102,33 +103,15 @@ public class DailyWordManager : MonoBehaviour
 	public string GetAssetPath(string letter)
 	{
 		// check for letter = "ÜÖÇŞĞIİ"
-		switch ((int)letter[0])
+		foreach(var letterData in letters)
 		{
-			case 220:
-				letter = "u_";
+			if ((int)letter[0] == letterData.code)
+			{
+				letter = letterData.letter;
 				break;
-			case 214:
-				letter = "o_";
-				break;
-			case 199:
-				letter = "c_";
-				break;
-			case 350:
-				letter = "s_";
-				break;
-			case 286:
-				letter = "g_";
-				break;
-			case 304:
-				letter = "i";
-				break;
-			case 73:
-				letter = "i_";
-				break;
-			default:
-				letter = letter.ToLower();
-				break;
+			}
 		}
+
 		letter = letter.ToLower();
 		string url = (letter);
 		return url;

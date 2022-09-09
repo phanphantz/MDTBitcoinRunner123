@@ -5,27 +5,20 @@ public class Enemy : MonoBehaviour
 {
 	public GameObject enemyIndicator;
 	public GameObject enemy;
-	public ParticleSystem explosion;
-
 	bool canMove = false;
 	bool paused = false;
 
 	float originalSpeed = 0;
 	float speed = 0;
 	Vector3 originalPos = new Vector3();
-	Vector3 originalExplosionPos = new Vector3();
 
-	bool explosionPlaying = false;
-
+	public Explosion explosionComponent;
+	
 	void Start()
 	{
 		originalPos = enemy.transform.position;
 		originalPos.x = UIManager.Instance.cameraHorizontalExtent + 10;
 		enemy.transform.position = originalPos;
-
-		originalExplosionPos = explosion.transform.position;
-		originalExplosionPos.x = UIManager.Instance.cameraHorizontalExtent + 10;
-		explosion.transform.position = originalExplosionPos;
 	}
 
 	void Update()
@@ -66,27 +59,12 @@ public class Enemy : MonoBehaviour
 
 	IEnumerator PlaceExplosion(float x, float y)
     {
-        AddExplosion(x, y);
+        explosionComponent.Add(x, y);
 
         if (!paused)
             yield return new WaitForSeconds(2.0f);
 
-        RemoveExplosion();
-    }
-
-    private void RemoveExplosion()
-    {
-        LevelSpawnManager.Instance.RemoveExplosion(explosion.gameObject);
-        explosionPlaying = false;
-
-        explosion.transform.position = originalExplosionPos;
-    }
-
-    private void AddExplosion(float x, float y)
-    {
-        explosion.transform.position = new Vector3(x - 6, y, originalExplosionPos.z);
-        explosionPlaying = true;
-        LevelSpawnManager.Instance.AddExplosion(explosion);
+         explosionComponent.Remove();
     }
 
     public void Spawn(float s, float minY, float maxY)
@@ -96,27 +74,23 @@ public class Enemy : MonoBehaviour
 	}
 
 	public void ResetObject()
-	{
-		StopAllCoroutines();
+    {
+        StopAllCoroutines();
+        explosionComponent.Reset();
 
-		if (explosionPlaying)
-		{
-			LevelSpawnManager.Instance.RemoveExplosion(explosion.gameObject);
-		}
+        canMove = false;
+        paused = false;
 
-		canMove = false;
-		paused = false;
+        enemy.transform.position = originalPos;
+        enemy.SetActive(false);
 
-		enemy.transform.position = originalPos;
-		enemy.SetActive(false);
+        enemyIndicator.SetActive(false);
+        enemyIndicator.transform.position = new Vector3(UIManager.Instance.cameraHorizontalExtent - 10, 0, -5f);
 
-		enemyIndicator.SetActive(false);
-		enemyIndicator.transform.position = new Vector3(UIManager.Instance.cameraHorizontalExtent - 10, 0, -5f);
+        EnemyManager.Instance.ResetEnemy(this);
+    }
 
-		EnemyManager.Instance.ResetEnemy(this);
-	}
-
-	public void TargetHit(bool playExplosion)
+    public void TargetHit(bool playExplosion)
 	{
 		canMove = false;
 		paused = false;

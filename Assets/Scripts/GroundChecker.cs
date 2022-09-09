@@ -5,27 +5,34 @@ public class GroundChecker : MonoBehaviour
 {
 	public string carName;
 	public string busName;
+	public string tankName;
+	public string jeepName;
+
+	[SerializeField] CarData[] cars;
+	[SerializeField] CarData defaultData;
 
 	void OnTriggerStay(Collider other)
 	{
-		if (other.transform.name.Contains(carName))
+		foreach(var carData in cars)
 		{
-			PlayerManager.Instance.minY = -16;
-			PlayerManager.Instance.isOnTheCar = true;
-			PlayerManager.Instance.isOnTheBus = false;
-		}
-		else if (other.transform.name.Contains(busName))
-		{
-			PlayerManager.Instance.minY = -9;
-			PlayerManager.Instance.isOnTheCar = false;
-			PlayerManager.Instance.isOnTheBus = true;
-		}
+			if (other.transform.name.Contains(carData.name))
+            {
+                ApplyCarDataToPlayer(carData);
+				break;
+            }
+        }
 	}
 
-	void OnTriggerExit(Collider collision)
+    private static void ApplyCarDataToPlayer(CarData carData)
+    {
+        PlayerManager.Instance.minY = carData.minY;
+        PlayerManager.Instance.isOnTheCar = carData.name == "Car";
+        PlayerManager.Instance.isOnTheBus = carData.name == "Bus";
+    }
+
+    void OnTriggerExit(Collider collision)
 	{
-		PlayerManager.Instance.minY = -23;
-		PlayerManager.Instance.isOnTheCar = false;
-		PlayerManager.Instance.isOnTheBus = false;
+		ApplyCarDataToPlayer(defaultData);
 	}
+
 }

@@ -45,27 +45,28 @@ public class PlayerManager : MonoBehaviour
     public bool disableCoinTrigger = false;
     public bool disableLetterTrigger = false;
 
-    float speed = 0.0f;
+    float verticalSpeed = 0.0f;
     float newSpeed = 0.0f;
     Vector3 newRotation = new Vector3(0, 0, 0);
     float distanceToMax;
     float distanceToMin;
     float xPos = -30;
     float startingPos = -37;
-    bool movingUpward = false;
-    bool playerControllerEnabled = false;
-    bool canCrash = true;
+
+    bool isMovingUpward = false;
+    bool isPlayerControllerEnabled = false;
+    bool isCanCrash = true;
     bool isFalling = false;
-    bool crashed = false;
-    bool firstObstacleSpawned = false;
+    bool isCrashed = false;
+    bool isFirstObstacleSpawned = false;
     bool isSecondChanceCollected = false;
-    bool secondChancePowerupEnabled = false;
-    bool boughtSecondChanceUsed = false;
-    bool shieldPowerupEnabled = false;
-    bool coinMagnetPowerupEnabled = false;
-    bool longJumpPowerupEnabled = false;
-    bool speedPowerupEnabled = false; // speed and flinger powerups use this variable for enable/disable control
-    bool paused = false;
+    bool isSecondChancePowerupEnabled = false;
+    bool isBoughtSecondChanceUsed = false;
+    bool isShieldPowerupEnabled = false;
+    bool isCoinMagnetPowerupEnabled = false;
+    bool isLongJumpPowerupEnabled = false;
+    bool isSpeedPowerupEnabled = false; // speed and flinger powerups use this variable for enable/disable control
+    bool isPaused = false;
 
     [Header("Animator & Animation Parameters")]
     public Animator characterAnimator;
@@ -120,7 +121,7 @@ public class PlayerManager : MonoBehaviour
 
     void Update()
     {
-        if (playerControllerEnabled)
+        if (isPlayerControllerEnabled)
         {
             UpdateCharacterAnimationAndMovement();
             return;
@@ -132,7 +133,7 @@ public class PlayerManager : MonoBehaviour
             return;
         }
 
-        speed = 0;
+        verticalSpeed = 0;
     }
 
     private void UpdateCharacterAnimationAndMovement()
@@ -146,12 +147,12 @@ public class PlayerManager : MonoBehaviour
         distanceToMax = transform.position.y - minY;
         distanceToMin = maxY - transform.position.y;
         OnMovingForward();
-        transform.position += Vector3.up * speed * 2 * Time.deltaTime;
+        transform.position += Vector3.up * verticalSpeed * 2 * Time.deltaTime;
     }
 
     void OnMovingForward()
     {
-        if (movingUpward)
+        if (isMovingUpward)
         {
             OnMovingUp();
             return;
@@ -162,13 +163,13 @@ public class PlayerManager : MonoBehaviour
 
     private void OnNotMovingUp()
     {
-        speed -= Time.deltaTime * maxVerticalSpeed;
+        verticalSpeed -= Time.deltaTime * maxVerticalSpeed;
         if (distanceToMax < safetyZoneEdge)
         {
             newSpeed = maxVerticalSpeed * (minY - transform.position.y) / safetyZoneEdge;
 
-            if (newSpeed > speed)
-                speed = newSpeed;
+            if (newSpeed > verticalSpeed)
+                verticalSpeed = newSpeed;
 
 			return;
         }
@@ -177,21 +178,21 @@ public class PlayerManager : MonoBehaviour
         {
             newSpeed = maxVerticalSpeed * (maxY - transform.position.y) / safetyZoneEdge;
 
-            if (newSpeed < speed)
-                speed = newSpeed;
+            if (newSpeed < verticalSpeed)
+                verticalSpeed = newSpeed;
         }
     }
 
     private void OnMovingUp()
     {
-        speed += Time.deltaTime * 1500;
+        verticalSpeed += Time.deltaTime * 1500;
         ChangeSpeed();
-        movingUpward = false;
+        isMovingUpward = false;
     }
 
     void UpdateAnimatorParameters()
     {
-        characterAnimator.SetFloat("CharacterSpeed", speed);
+        characterAnimator.SetFloat("CharacterSpeed", verticalSpeed);
 
         SetCharacterAnimatorBool("OnTheCar", isOnTheCar);
         SetCharacterAnimatorBool("OnTheBus", isOnTheBus);
@@ -208,8 +209,8 @@ public class PlayerManager : MonoBehaviour
         {
             newSpeed = maxVerticalSpeed * (maxY - transform.position.y) / safetyZoneEdge;
 
-            if (newSpeed < speed)
-                speed = newSpeed;
+            if (newSpeed < verticalSpeed)
+                verticalSpeed = newSpeed;
 
 			return;
         }
@@ -218,8 +219,8 @@ public class PlayerManager : MonoBehaviour
         {
             newSpeed = 1500 * (minY - transform.position.y) / safetyZoneEdge;
 
-            if (newSpeed > speed)
-                speed = newSpeed;
+            if (newSpeed > verticalSpeed)
+                verticalSpeed = newSpeed;
         }
 		
     }
@@ -231,11 +232,11 @@ public class PlayerManager : MonoBehaviour
 
     void Crash()
     {
-        crashed = true;
+        isCrashed = true;
 
-        SetCharacterAnimatorBool("Crashed", crashed);
+        SetCharacterAnimatorBool("Crashed", isCrashed);
 
-        speed = 0;
+        verticalSpeed = 0;
         isFalling = false;
 
         ParticleSystem.EmissionModule smokeEmissionModule = smokeParticle.emission;
@@ -255,9 +256,9 @@ public class PlayerManager : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "Obstacles" && other.name == "ObstacleGenTriggerer" && !firstObstacleSpawned)
+        if (other.tag == "Obstacles" && other.name == "ObstacleGenTriggerer" && !isFirstObstacleSpawned)
         {
-            firstObstacleSpawned = true;
+            isFirstObstacleSpawned = true;
             LevelSpawnManager.Instance.SpawnObstacles();
         }
         else if (other.tag == "Coin" && !disableCoinTrigger)
@@ -308,12 +309,12 @@ public class PlayerManager : MonoBehaviour
         }
         else if (other.tag == "Enemy" && !disableEnemyTrigger)
         {
-            if (!isFalling && canCrash && !shieldPowerupEnabled)
+            if (!isFalling && isCanCrash && !isShieldPowerupEnabled)
             {
                 isFalling = true;
                 DisablePlayerControls();
             }
-            else if (shieldPowerupEnabled && !speedPowerupEnabled)
+            else if (isShieldPowerupEnabled && !isSpeedPowerupEnabled)
             {
                 StartCoroutine(DisableShield());
             }
@@ -323,7 +324,7 @@ public class PlayerManager : MonoBehaviour
         {
             String collidedPowerup = other.transform.name;
 
-            if (shieldPowerupEnabled && !speedPowerupEnabled && !collidedPowerup.Equals("Shield"))
+            if (isShieldPowerupEnabled && !isSpeedPowerupEnabled && !collidedPowerup.Equals("Shield"))
             {
                 StartCoroutine(DisableShield());
             }
@@ -379,7 +380,7 @@ public class PlayerManager : MonoBehaviour
 
     public void ActivateSecondChance()
     {
-        if (playerControllerEnabled)
+        if (isPlayerControllerEnabled)
         {
             SecondChanceCollected();
             PlaySoundClip(secondChanceAudioEffect);
@@ -388,7 +389,7 @@ public class PlayerManager : MonoBehaviour
 
     public void ActivateObstacleBlaster()
     {
-        if (playerControllerEnabled)
+        if (isPlayerControllerEnabled)
         {
             StartCoroutine(LaunchObstacleBlaster());
             PlaySoundClip(obstacleBlasterAudioEffect);
@@ -429,7 +430,7 @@ public class PlayerManager : MonoBehaviour
 
         while (t < 1.0f)
         {
-            if (!paused)
+            if (!isPaused)
             {
                 t += Time.deltaTime * rate;
                 obj.localScale = Vector3.Lerp(startScale, scale, t);
@@ -458,7 +459,7 @@ public class PlayerManager : MonoBehaviour
 
         while (i < 1.0)
         {
-            if (!paused)
+            if (!isPaused)
             {
                 i += Time.deltaTime * rate;
                 obj.position = Vector3.Lerp(startPos, endPos, i);
@@ -469,19 +470,19 @@ public class PlayerManager : MonoBehaviour
 
         if (enableObj)
         {
-            playerControllerEnabled = true;
+            isPlayerControllerEnabled = true;
         }
     }
 
     public void ActivateSpeed()
     {
-        if (speedPowerupEnabled || isFalling || !playerControllerEnabled)
+        if (isSpeedPowerupEnabled || isFalling || !isPlayerControllerEnabled)
         {
             return;
         }
 
-        speedPowerupEnabled = true;
-        canCrash = false;
+        isSpeedPowerupEnabled = true;
+        isCanCrash = false;
 
         speedParticle.SetActive(true);
         speedTrail.SetActive(true);
@@ -500,7 +501,7 @@ public class PlayerManager : MonoBehaviour
         newSpeed = LevelSpawnManager.Instance.scrollSpeed;
         LevelSpawnManager.Instance.scrollSpeed = 3;
 
-        if (!paused)
+        if (!isPaused)
         {
             yield return new WaitForSeconds(time);
         }
@@ -516,8 +517,8 @@ public class PlayerManager : MonoBehaviour
     public void ResetExtraSpeed()
     {
         LevelSpawnManager.Instance.scrollSpeed = newSpeed;
-        speedPowerupEnabled = false;
-        canCrash = true;
+        isSpeedPowerupEnabled = false;
+        isCanCrash = true;
 
         speedParticle.SetActive(false);
         speedTrail.SetActive(false);
@@ -530,7 +531,7 @@ public class PlayerManager : MonoBehaviour
 
     public void ActivateDoubleBitcoin()
     {
-        if (speedPowerupEnabled || isFalling || !playerControllerEnabled)
+        if (isSpeedPowerupEnabled || isFalling || !isPlayerControllerEnabled)
         {
             return;
         }
@@ -546,7 +547,7 @@ public class PlayerManager : MonoBehaviour
 
     IEnumerator DoubleBitcoinEffect(float time)
     {
-        if (!paused)
+        if (!isPaused)
         {
             yield return new WaitForSeconds(time);
         }
@@ -562,12 +563,12 @@ public class PlayerManager : MonoBehaviour
 
     public void ActivateCoinMagnet()
     {
-        if (coinMagnetPowerupEnabled || speedPowerupEnabled || isFalling || !playerControllerEnabled)
+        if (isCoinMagnetPowerupEnabled || isSpeedPowerupEnabled || isFalling || !isPlayerControllerEnabled)
         {
             return;
         }
 
-        coinMagnetPowerupEnabled = true;
+        isCoinMagnetPowerupEnabled = true;
 
         UIManager.Instance.collectedCoinMagnet.gameObject.SetActive(true);
 
@@ -583,7 +584,7 @@ public class PlayerManager : MonoBehaviour
 
     IEnumerator DisableCoinMagnet(float time)
     {
-        if (!paused)
+        if (!isPaused)
         {
             yield return new WaitForSeconds(time);
         }
@@ -596,13 +597,13 @@ public class PlayerManager : MonoBehaviour
         coinMagnet.transform.gameObject.SetActive(false);
         coinMagnetCollider.enabled = false;
         UIManager.Instance.collectedCoinMagnet.gameObject.SetActive(false);
-        coinMagnetPowerupEnabled = false;
+        isCoinMagnetPowerupEnabled = false;
         gameObject.GetComponent<AudioSource>().Stop();
     }
 
     public void ActivateFlinger()
     {
-        if (speedPowerupEnabled || isFalling || !playerControllerEnabled)
+        if (isSpeedPowerupEnabled || isFalling || !isPlayerControllerEnabled)
         {
             return;
         }
@@ -610,8 +611,8 @@ public class PlayerManager : MonoBehaviour
         gameObject.GetComponent<AudioSource>().Stop();
         AudioSource.PlayClipAtPoint(flingerAudioEffect, Vector3.up, SoundManager.Instance.audioVolume);
 
-        speedPowerupEnabled = true;
-        canCrash = false;
+        isSpeedPowerupEnabled = true;
+        isCanCrash = false;
 
         LevelSpawnManager.Instance.BeginExtraSpeed(); // It uses the same method because this is like speed effect in a short time.
         StartCoroutine(FlingerEffect(flingerActivationDuration));
@@ -622,7 +623,7 @@ public class PlayerManager : MonoBehaviour
         newSpeed = LevelSpawnManager.Instance.scrollSpeed;
         LevelSpawnManager.Instance.scrollSpeed = 2;
 
-        if (!paused)
+        if (!isPaused)
         {
             yield return new WaitForSeconds(time);
         }
@@ -638,8 +639,8 @@ public class PlayerManager : MonoBehaviour
     public void ResetFlinger()
     {
         LevelSpawnManager.Instance.scrollSpeed = newSpeed;
-        speedPowerupEnabled = false;
-        canCrash = true;
+        isSpeedPowerupEnabled = false;
+        isCanCrash = true;
 
         speedParticle.SetActive(false);
         speedTrail.SetActive(false);
@@ -649,7 +650,7 @@ public class PlayerManager : MonoBehaviour
 
     public void ActivateLongJump()
     {
-        if (speedPowerupEnabled || isFalling || !playerControllerEnabled)
+        if (isSpeedPowerupEnabled || isFalling || !isPlayerControllerEnabled)
         {
             return;
         }
@@ -657,7 +658,7 @@ public class PlayerManager : MonoBehaviour
         gameObject.GetComponent<AudioSource>().Stop();
         AudioSource.PlayClipAtPoint(longJumpAudioEffect, Vector3.up, SoundManager.Instance.audioVolume);
 
-        longJumpPowerupEnabled = true;
+        isLongJumpPowerupEnabled = true;
         UIManager.Instance.collectedLongJump.gameObject.SetActive(true);
 
         tempMaxVerticalSpeed = maxVerticalSpeed;
@@ -667,7 +668,7 @@ public class PlayerManager : MonoBehaviour
 
     IEnumerator DisableLongJump(float time)
     {
-        if (!paused)
+        if (!isPaused)
         {
             yield return new WaitForSeconds(time);
         }
@@ -677,19 +678,19 @@ public class PlayerManager : MonoBehaviour
 
     public void ResetLongJump()
     {
-        longJumpPowerupEnabled = false;
+        isLongJumpPowerupEnabled = false;
         maxVerticalSpeed = tempMaxVerticalSpeed;
         UIManager.Instance.collectedLongJump.gameObject.SetActive(false);
     }
 
     public void ActivateShield()
     {
-        if (shieldPowerupEnabled || isFalling || !playerControllerEnabled)
+        if (isShieldPowerupEnabled || isFalling || !isPlayerControllerEnabled)
         {
             return;
         }
 
-        shieldPowerupEnabled = true;
+        isShieldPowerupEnabled = true;
         UIManager.Instance.collectedShield.gameObject.SetActive(true);
         StartCoroutine(ScaleObject(shield.transform, new Vector3(21, 21, 1), 0.35f, false));
 
@@ -703,7 +704,7 @@ public class PlayerManager : MonoBehaviour
         StartCoroutine(ScaleObject(shield.transform, new Vector3(0.01f, 1, 0.01f), 0.35f, true));
         shieldCollider.enabled = false;
 
-        if (!paused)
+        if (!isPaused)
         {
             yield return new WaitForSeconds(0.5f);
         }
@@ -713,7 +714,7 @@ public class PlayerManager : MonoBehaviour
 
     public void ResetSheild()
     {
-        shieldPowerupEnabled = false;
+        isShieldPowerupEnabled = false;
         UIManager.Instance.collectedShield.gameObject.SetActive(false);
         gameObject.GetComponent<AudioSource>().Stop();
     }
@@ -725,7 +726,7 @@ public class PlayerManager : MonoBehaviour
         // move the effect object from left to right at the screen
         StartCoroutine(MoveToPosition(obstacleBlasterParticle.transform, new Vector3((UIManager.Instance.cameraHorizontalExtent + 10), 0, -5), 1.25f, false));
 
-        if (!paused)
+        if (!isPaused)
         {
             yield return new WaitForSeconds(2.0f);
         }
@@ -735,7 +736,7 @@ public class PlayerManager : MonoBehaviour
 
     public void MoveUp()
     {
-        if (longJumpPowerupEnabled)
+        if (isLongJumpPowerupEnabled)
         {
             maxVerticalSpeed = maxLongJumpSpeed;
         }
@@ -744,9 +745,9 @@ public class PlayerManager : MonoBehaviour
             maxVerticalSpeed = 85.0f;
         }
 
-        if (distanceToMin > 0 && playerControllerEnabled)
+        if (distanceToMin > 0 && isPlayerControllerEnabled)
         {
-            movingUpward = true;
+            isMovingUpward = true;
         }
     }
 
@@ -754,24 +755,24 @@ public class PlayerManager : MonoBehaviour
     {
         maxVerticalSpeed = maxLongJumpSpeed;
 
-        if (distanceToMin > 0 && playerControllerEnabled)
+        if (distanceToMin > 0 && isPlayerControllerEnabled)
         {
-            movingUpward = true;
+            isMovingUpward = true;
         }
     }
 
     public void MoveDown()
     {
-        if (distanceToMax > 0 && playerControllerEnabled)
+        if (distanceToMax > 0 && isPlayerControllerEnabled)
         {
-            movingUpward = false;
+            isMovingUpward = false;
         }
 
     }
 
     public bool HasSecondChance()
     {
-        if (isSecondChanceCollected || (PreferencesManager.Instance.GetPowerup("SecondChance") > 0 && !boughtSecondChanceUsed))
+        if (isSecondChanceCollected || (PreferencesManager.Instance.GetPowerup("SecondChance") > 0 && !isBoughtSecondChanceUsed))
         {
             return true;
         }
@@ -783,9 +784,9 @@ public class PlayerManager : MonoBehaviour
 
     public IEnumerator UseSecondChance()
     {
-        if (!secondChancePowerupEnabled)
+        if (!isSecondChancePowerupEnabled)
         {
-            secondChancePowerupEnabled = true;
+            isSecondChancePowerupEnabled = true;
 
             if (isSecondChanceCollected)
             {
@@ -794,12 +795,12 @@ public class PlayerManager : MonoBehaviour
             }
             else
             {
-                boughtSecondChanceUsed = true;
+                isBoughtSecondChanceUsed = true;
                 PreferencesManager.Instance.ModifyPowerup("SecondChance", -1);
                 UIManager.Instance.boughtSecondChance.gameObject.SetActive(false);
             }
 
-            speed = 0;
+            verticalSpeed = 0;
             secondChanceParticle.Play();
 
             newRotation = new Vector3(0, 0, 0);
@@ -814,13 +815,13 @@ public class PlayerManager : MonoBehaviour
             LevelSpawnManager.Instance.ContinueScrolling();
             StartCoroutine(EnableEnemyTrigger());
 
-            crashed = false;
-            canCrash = true;
-            playerControllerEnabled = true;
-            movingUpward = false;
-            secondChancePowerupEnabled = false;
+            isCrashed = false;
+            isCanCrash = true;
+            isPlayerControllerEnabled = true;
+            isMovingUpward = false;
+            isSecondChancePowerupEnabled = false;
 
-            SetCharacterAnimatorBool("Crashed", crashed);
+            SetCharacterAnimatorBool("Crashed", isCrashed);
         }
 
         yield return new WaitForEndOfFrame();
@@ -843,27 +844,27 @@ public class PlayerManager : MonoBehaviour
         ResetDoubleBitcoin();
         ResetExtraSpeed();
 
-        speed = 0;
-        crashed = false;
-        SetCharacterAnimatorBool("Crashed", crashed);
-        paused = false;
-        movingUpward = false;
-        canCrash = true;
+        verticalSpeed = 0;
+        isCrashed = false;
+        SetCharacterAnimatorBool("Crashed", isCrashed);
+        SetIsPaused(false);
+        isMovingUpward = false;
+        isCanCrash = true;
 
-        secondChancePowerupEnabled = false;
+        isSecondChancePowerupEnabled = false;
         isSecondChanceCollected = false;
-        boughtSecondChanceUsed = false;
-        speedPowerupEnabled = false;
-        shieldPowerupEnabled = false;
-        coinMagnetPowerupEnabled = false;
-        longJumpPowerupEnabled = false;
+        isBoughtSecondChanceUsed = false;
+        isSpeedPowerupEnabled = false;
+        isShieldPowerupEnabled = false;
+        isCoinMagnetPowerupEnabled = false;
+        isLongJumpPowerupEnabled = false;
 
         LevelManager.Instance.CoinParameterNormal();
 
         shield.transform.localScale = new Vector3(0.01f, 1, 0.01f);
         speedParticle.SetActive(false);
         speedTrail.SetActive(false);
-        firstObstacleSpawned = false;
+        isFirstObstacleSpawned = false;
 
         newRotation = new Vector3(0, 0, 0);
 
@@ -879,30 +880,35 @@ public class PlayerManager : MonoBehaviour
         characterAnimator.enabled = true;
     }
 
+    private void SetIsPaused(bool value)
+    {
+        isPaused = value;
+    }
+
     public void EnablePlayerControls()
     {
-        playerControllerEnabled = true;
+        isPlayerControllerEnabled = true;
     }
 
     public void DisablePlayerControls()
     {
-        playerControllerEnabled = false;
+        isPlayerControllerEnabled = false;
     }
 
     public void Pause()
     {
-        paused = true;
+        SetIsPaused(true);
         characterAnimator.enabled = false;
     }
 
     public void Resume()
     {
-        paused = false;
+        SetIsPaused(false);
         characterAnimator.enabled = true;
     }
 
     public bool Crashed()
     {
-        return crashed;
+        return isCrashed;
     }
 }

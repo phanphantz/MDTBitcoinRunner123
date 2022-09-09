@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public class BasicScaleAnimation : BasicTransformAnimation
+public class ScaleAnimation : TransformAnimation
 {
 
     protected override void SetReverseValue(float t)
@@ -13,5 +13,5 @@ public class BasicScaleAnimation : BasicTransformAnimation
 	{
         this.gameObject.transform.localScale = Vector3.Lerp(start, target, t);
     }
-	
+
 }

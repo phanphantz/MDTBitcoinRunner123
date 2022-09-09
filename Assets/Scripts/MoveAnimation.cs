@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public class BasicMoveAnimation : BasicTransformAnimation
+public class MoveAnimation : TransformAnimation
 {
     protected override void OnEnable()
     {

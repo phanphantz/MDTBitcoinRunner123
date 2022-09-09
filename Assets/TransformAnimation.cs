@@ -3,7 +3,7 @@ using System.Collections;
 using System.Linq;
 using UnityEngine;
 
-public abstract class BasicTransformAnimation : MonoBehaviour 
+public abstract class TransformAnimation : MonoBehaviour 
 {
     protected float time;
 	protected Vector3 start;

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class BasicRotateAnimation : BasicTransformAnimation
+public class RotateAnimation : TransformAnimation
 {
     protected override void SetReverseValue(float t)
     {

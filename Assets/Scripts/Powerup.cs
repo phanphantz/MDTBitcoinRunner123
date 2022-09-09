@@ -74,6 +74,8 @@ public class Powerup : MonoBehaviour
 		trail.SetActive(false);
 
 		this.transform.position = startingPos;
+
+		DisableTrail();
 		PowerupManager.Instance.ResetPowerup(this);
 	}
 }

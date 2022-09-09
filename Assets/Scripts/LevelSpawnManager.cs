@@ -459,9 +459,10 @@ public class LevelSpawnManager : MonoBehaviour
 		}
 	}
 
-	public void AddExplosion(GameObject exp)
+	public void AddExplosion(ParticleSystem explosion)
 	{
-		activeElements.Add(exp);
+        explosion.Play();
+		activeElements.Add(explosion.gameObject);
 	}
 
 	public void RemoveExplosion(GameObject exp)

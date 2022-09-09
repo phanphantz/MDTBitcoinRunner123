@@ -106,7 +106,6 @@ public class PowerupManager : MonoBehaviour
 
 	public void ResetPowerup(Powerup sender)
 	{
-		sender.DisableTrail();
 		activated.Remove(sender);
 		deactivated.Add(sender);
 	}

@@ -65,25 +65,31 @@ public class Enemy : MonoBehaviour
 	}
 
 	IEnumerator PlaceExplosion(float x, float y)
-	{
-		explosion.transform.position = new Vector3(x - 6, y, originalExplosionPos.z);
-		explosion.Play();
+    {
+        AddExplosion(x, y);
 
-		explosionPlaying = true;
-		LevelSpawnManager.Instance.AddExplosion(explosion.gameObject);
+        if (!paused)
+            yield return new WaitForSeconds(2.0f);
 
-		if (!paused)
-		{
-			yield return new WaitForSeconds(2.0f);
-		}
+        RemoveExplosion();
+    }
 
-		LevelSpawnManager.Instance.RemoveExplosion(explosion.gameObject);
-		explosionPlaying = false;
+    private void RemoveExplosion()
+    {
+        LevelSpawnManager.Instance.RemoveExplosion(explosion.gameObject);
+        explosionPlaying = false;
 
-		explosion.transform.position = originalExplosionPos;
-	}
+        explosion.transform.position = originalExplosionPos;
+    }
 
-	public void Spawn(float s, float minY, float maxY)
+    private void AddExplosion(float x, float y)
+    {
+        explosion.transform.position = new Vector3(x - 6, y, originalExplosionPos.z);
+        explosionPlaying = true;
+        LevelSpawnManager.Instance.AddExplosion(explosion);
+    }
+
+    public void Spawn(float s, float minY, float maxY)
 	{
 		originalSpeed = s;
 		StartCoroutine(PlaceEnemyIndicator(minY, maxY));

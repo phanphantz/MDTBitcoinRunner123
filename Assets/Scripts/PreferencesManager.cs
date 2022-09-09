@@ -59,11 +59,6 @@ public class PreferencesManager : MonoBehaviour
 		PlayerPrefs.Save();
 	}
 
-	public int GetCoins()
-	{
-		return PlayerPrefs.GetInt("CoinCount", 0);
-	}
-
 	public int GetBestDistance()
 	{
 		return PlayerPrefs.GetInt("BestDistance", 0);
@@ -104,10 +99,20 @@ public class PreferencesManager : MonoBehaviour
 		return PlayerPrefs.HasKey("first_open");
 	}
 
-	public void SetCoins(int count)
+	public void AddCoins(int count)
+	{
+		SetCoins(GetCoins() + count);
+	}
+
+	void SetCoins(int count)
 	{
 		PlayerPrefs.SetInt("CoinCount", count);
 		PlayerPrefs.Save();
+	}
+
+	public int GetCoins()
+	{
+		return PlayerPrefs.GetInt("CoinCount", 0);
 	}
 
 	public void IncreaseCoinCount()

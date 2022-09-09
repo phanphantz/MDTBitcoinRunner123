@@ -25,7 +25,7 @@ public class ShopItem : MonoBehaviour
 	{
 		if (PreferencesManager.Instance.GetCoins() >= itemPrice)
 		{
-			PreferencesManager.Instance.SetCoins(PreferencesManager.Instance.GetCoins() - itemPrice);
+			PreferencesManager.Instance.AddCoins(-itemPrice);
 			PreferencesManager.Instance.ModifyPowerup(itemName, 1);
 			UpdateShopItem();
 			UIManager.Instance.UpdateMenuCoinCounts();

@@ -212,7 +212,7 @@ public class UIManager : MonoBehaviour
 		SocialLeaderboardManager.Instance.ReportScore(reportedDistance, SocialLeaderboardManager.LeaderboardIDs.TopRunner);
 #endif
 		//Add the collected coins to the account
-		PreferencesManager.Instance.SetCoins(PreferencesManager.Instance.GetCoins() + LevelManager.Instance.Coins());
+		PreferencesManager.Instance.AddCoins(LevelManager.Instance.Coins());
 
 		FirebaseEventManager.Instance.SendEarnVirtualCurrency();
 

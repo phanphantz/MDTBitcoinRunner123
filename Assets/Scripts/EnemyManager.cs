@@ -8,8 +8,8 @@ public class EnemyManager : MonoBehaviour
 	public float movementSpeed = 0;
 	public float minSpawnY = -14;
 	public float maxSpawnY = 14;
-	List<Enemy> deactivated = new List<Enemy>();
-	List<Enemy> activated = new List<Enemy>();
+	List<Enemy> deactivatedEnemyList = new List<Enemy>();
+	List<Enemy> activatedEnemyList = new List<Enemy>();
 
 	public static EnemyManager Instance
 	{
@@ -39,13 +39,13 @@ public class EnemyManager : MonoBehaviour
 
 		foreach (Transform child in transform)
 		{
-			deactivated.Add(child.GetComponent<Enemy>());
+			deactivatedEnemyList.Add(child.GetComponent<Enemy>());
 		}
 	}
 
 	public void SpawnEnemy()
 	{
-		Enemy enemy = deactivated[0];
+		Enemy enemy = deactivatedEnemyList[0];
 
 		ActivateEnemy(enemy);
 
@@ -54,14 +54,14 @@ public class EnemyManager : MonoBehaviour
 
 	public void ActivateEnemy(Enemy enemy)
 	{
-		deactivated.Remove(enemy);
-		activated.Add(enemy);
+		deactivatedEnemyList.Remove(enemy);
+		activatedEnemyList.Add(enemy);
 	}
 
 	public void ResetEnemy(Enemy sender)
 	{
-		activated.Remove(sender);
-		deactivated.Add(sender);
+		activatedEnemyList.Remove(sender);
+		deactivatedEnemyList.Add(sender);
 	}
 
 	public void ResetAll()

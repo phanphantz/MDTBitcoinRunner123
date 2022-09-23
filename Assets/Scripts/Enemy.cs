@@ -3,29 +3,29 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-	public GameObject enemyIndicator;
-	public GameObject enemy;
+	public GameObject enemyIndicatorGameObj;
+	public GameObject enemyGameObj;
 	bool canMove = false;
-	bool paused = false;
+	bool isPaused = false;
 
 	float originalSpeed = 0;
-	float speed = 0;
+	float currentSpeed = 0;
 	Vector3 originalPos = new Vector3();
 
 	public Explosion explosionComponent;
 	
 	void Start()
 	{
-		originalPos = enemy.transform.position;
+		originalPos = enemyGameObj.transform.position;
 		originalPos.x = UIManager.Instance.cameraHorizontalExtent + 10;
-		enemy.transform.position = originalPos;
+		enemyGameObj.transform.position = originalPos;
 	}
 
 	void Update()
 	{
-		if (canMove && !paused)
+		if (canMove && !isPaused)
 		{
-			enemy.transform.position -= Vector3.right * speed * Time.deltaTime;
+			enemyGameObj.transform.position -= Vector3.right * currentSpeed * Time.deltaTime;
 		}
 	}
 
@@ -33,24 +33,24 @@ public class Enemy : MonoBehaviour
 	{
 		float randomYPos = Random.Range(minY, maxY);
 
-		enemyIndicator.transform.position = new Vector3(UIManager.Instance.cameraHorizontalExtent - 10, randomYPos, -5f);
-		enemyIndicator.SetActive(true);
+		enemyIndicatorGameObj.transform.position = new Vector3(UIManager.Instance.cameraHorizontalExtent - 10, randomYPos, -5f);
+		enemyIndicatorGameObj.SetActive(true);
 
-		if (!paused)
+		if (!isPaused)
 		{
 			yield return new WaitForSeconds(3.0f);
 		}
 
-		enemyIndicator.SetActive(false);
-		enemyIndicator.transform.position = new Vector3(UIManager.Instance.cameraHorizontalExtent - 10, 0, -5f);
+		enemyIndicatorGameObj.SetActive(false);
+		enemyIndicatorGameObj.transform.position = new Vector3(UIManager.Instance.cameraHorizontalExtent - 10, 0, -5f);
 
-		Vector3 pos = enemy.transform.position;
+		Vector3 pos = enemyGameObj.transform.position;
 		pos.y = randomYPos;
-		enemy.transform.position = pos;
+		enemyGameObj.transform.position = pos;
 
-		this.speed = originalSpeed * LevelSpawnManager.Instance.SpeedMultiplier();
+		this.currentSpeed = originalSpeed * LevelSpawnManager.Instance.SpeedMultiplier();
 
-		enemy.SetActive(true);
+		enemyGameObj.SetActive(true);
 
 		AudioSource.PlayClipAtPoint(PlayerManager.Instance.enemyAudioEffect, Vector3.up, SoundManager.Instance.audioVolume);
 
@@ -61,7 +61,7 @@ public class Enemy : MonoBehaviour
     {
         explosionComponent.Add(x, y);
 
-        if (!paused)
+        if (!isPaused)
             yield return new WaitForSeconds(2.0f);
 
          explosionComponent.Remove();
@@ -79,13 +79,13 @@ public class Enemy : MonoBehaviour
         explosionComponent.Reset();
 
         canMove = false;
-        paused = false;
+        isPaused = false;
 
-        enemy.transform.position = originalPos;
-        enemy.SetActive(false);
+        enemyGameObj.transform.position = originalPos;
+        enemyGameObj.SetActive(false);
 
-        enemyIndicator.SetActive(false);
-        enemyIndicator.transform.position = new Vector3(UIManager.Instance.cameraHorizontalExtent - 10, 0, -5f);
+        enemyIndicatorGameObj.SetActive(false);
+        enemyIndicatorGameObj.transform.position = new Vector3(UIManager.Instance.cameraHorizontalExtent - 10, 0, -5f);
 
         EnemyManager.Instance.ResetEnemy(this);
     }
@@ -93,15 +93,15 @@ public class Enemy : MonoBehaviour
     public void TargetHit(bool playExplosion)
 	{
 		canMove = false;
-		paused = false;
+		isPaused = false;
 
 		if (playExplosion)
 		{
-			StartCoroutine(PlaceExplosion(enemy.transform.position.x, enemy.transform.position.y));
+			StartCoroutine(PlaceExplosion(enemyGameObj.transform.position.x, enemyGameObj.transform.position.y));
 		}
 
-		enemy.transform.position = originalPos;
-		enemy.SetActive(false);
+		enemyGameObj.transform.position = originalPos;
+		enemyGameObj.SetActive(false);
 
 		EnemyManager.Instance.ResetEnemy(this);
 	}
@@ -109,12 +109,12 @@ public class Enemy : MonoBehaviour
 	// It is called from broadcast messages by EnemyManager
 	public void Pause()
 	{
-		paused = true;
+		isPaused = true;
 	}
 
 	// It is called from broadcast messages by EnemyManager
 	public void Resume()
 	{
-		paused = false;
+		isPaused = false;
 	}
 }

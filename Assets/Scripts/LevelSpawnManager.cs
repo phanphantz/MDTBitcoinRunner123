@@ -37,14 +37,14 @@ public class LevelSpawnManager : MonoBehaviour
 	float foregroundScrollSpeed;
 	float scrollSpeedBeforeCrash;
 
-	bool canSpawnPowerup = true;
-	bool canSpawnEnemy = true;
+	bool isCanSpawnPowerup = true;
+	bool isCanSpawnEnemy = true;
 
-	bool canSpawn = false;
-	bool paused = true;
+	bool isCanSpawn = false;
+	bool isPaused => GameStateManager.IsPause;
 
-	bool scrollStartTriggers = true;
-	bool canModifySpeed = true;
+	bool isScrollStartTriggers = true;
+	bool isCanModifySpeed = true;
 
 	public List<GameObject> letterObjects;
 
@@ -88,14 +88,14 @@ public class LevelSpawnManager : MonoBehaviour
 
 	void Update()
 	{
-		if (canSpawn && !paused)
+		if (isCanSpawn && !isPaused)
 		{
-			if (canSpawnPowerup)
+			if (isCanSpawnPowerup)
 			{
 				StartCoroutine(SpawnPowerup());
 			}
 
-			if (canSpawnEnemy)
+			if (isCanSpawnEnemy)
 			{
 				StartCoroutine(SpawnEnemy());
 			}
@@ -103,7 +103,7 @@ public class LevelSpawnManager : MonoBehaviour
 			ScrollLevel();
 		}
 
-		if (!paused)
+		if (!isPaused)
 		{
 			distance += scrollSpeed * Time.deltaTime * 25;
 		}
@@ -135,7 +135,7 @@ public class LevelSpawnManager : MonoBehaviour
 
 	public void ScrollLevel()
     {
-        if (canModifySpeed)
+        if (isCanModifySpeed)
         {
             scrollSpeed = defaultScrollSpeed + ((distance / maxScrollSpeedDist) * (maxScrollSpeed - defaultScrollSpeed));
         }
@@ -144,7 +144,7 @@ public class LevelSpawnManager : MonoBehaviour
 
         MoveActiveElements();
 
-        if (scrollStartTriggers)
+        if (isScrollStartTriggers)
         {
             startTriggers.transform.position -= Vector3.right * foregroundScrollSpeed * Time.deltaTime;
         }
@@ -246,7 +246,7 @@ public class LevelSpawnManager : MonoBehaviour
 
 	IEnumerator SpawnPowerup()
 	{
-		canSpawnPowerup = false;
+		isCanSpawnPowerup = false;
 
 		int n = Random.Range(15, 30); //power up frequency
 
@@ -255,17 +255,17 @@ public class LevelSpawnManager : MonoBehaviour
 			n = Random.Range(10, 25);
 		}
 
-		if (!paused)
+		if (!isPaused)
 		{
 			yield return new WaitForSeconds(n);
 		}
 		PowerupManager.Instance.SpawnPowerup(scrollSpeed / defaultScrollSpeed);
-		canSpawnPowerup = true;
+		isCanSpawnPowerup = true;
 	}
 
 	IEnumerator SpawnEnemy()
 	{
-		canSpawnEnemy = false;
+		isCanSpawnEnemy = false;
 
 		int n = Random.Range(15, 30); //enemy frequency
 
@@ -274,7 +274,7 @@ public class LevelSpawnManager : MonoBehaviour
 			n = Random.Range(10, 25);
 		}
 
-		if (!paused)
+		if (!isPaused)
 		{
 			yield return new WaitForSeconds(n);
 		}
@@ -285,17 +285,17 @@ public class LevelSpawnManager : MonoBehaviour
 		{
 			EnemyManager.Instance.SpawnEnemy();
 
-			if (!paused)
+			if (!isPaused)
 			{
 				yield return new WaitForSeconds(1.0f);
 			}
 		}
-		canSpawnEnemy = true;
+		isCanSpawnEnemy = true;
 	}
 
 	IEnumerator StopScrolling(float time)
 	{
-		canModifySpeed = false;
+		isCanModifySpeed = false;
 
 		if (!PlayerManager.Instance.HasSecondChance())
 		{
@@ -316,8 +316,8 @@ public class LevelSpawnManager : MonoBehaviour
 			yield return new WaitForEndOfFrame();
 		}
 
-		canSpawn = false;
-		paused = true;
+		isCanSpawn = false;
+		GameStateManager.SetIsPause(false);
 
 		yield return new WaitForSeconds(0.5f);
 
@@ -415,7 +415,7 @@ public class LevelSpawnManager : MonoBehaviour
 	IEnumerator StopScrollStartTriggers()
 	{
 		yield return new WaitForSeconds(1.5f);
-		scrollStartTriggers = false;
+		isScrollStartTriggers = false;
 	}
 
 	public void ResetObject(GameObject obj)
@@ -475,9 +475,9 @@ public class LevelSpawnManager : MonoBehaviour
 		ClearMap();
 		SetStartTriggersPosition();
 
-		canSpawnEnemy = true;
-		canSpawnPowerup = true;
-		canModifySpeed = true;
+		isCanSpawnEnemy = true;
+		isCanSpawnPowerup = true;
+		isCanModifySpeed = true;
 
 		distance = 0;
 		scrollSpeed = defaultScrollSpeed;
@@ -487,7 +487,7 @@ public class LevelSpawnManager : MonoBehaviour
 		SpawnCityBackgroundLayer(PlaceLocation.Normal);
 		SpawnCityLayer(PlaceLocation.Middle);
 
-		scrollStartTriggers = true;
+		isScrollStartTriggers = true;
 
 		DailyWordManager.Instance.CalculateDailyWords();
 
@@ -507,36 +507,36 @@ public class LevelSpawnManager : MonoBehaviour
 
 	public void Pause()
 	{
-		canSpawn = false;
-		paused = true;
+		isCanSpawn = false;
+		GameStateManager.SetIsPause(true);
 		EnemyManager.Instance.PauseAll();
 		PowerupManager.Instance.PauseAll();
 	}
 
 	public void Resume()
 	{
-		canSpawn = true;
-		paused = false;
+		isCanSpawn = true;
+		GameStateManager.SetIsPause(true);
 		EnemyManager.Instance.ResumeAll();
 		PowerupManager.Instance.ResumeAll();
 	}
 
 	public void BeginExtraSpeed()
 	{
-		canModifySpeed = false;
+		isCanModifySpeed = false;
 	}
 
 	public void EndExtraSpeed()
 	{
-		canModifySpeed = true;
+		isCanModifySpeed = true;
 	}
 
 	public void ContinueScrolling()
 	{
 		scrollSpeed = scrollSpeedBeforeCrash;
-		paused = false;
-		canSpawn = true;
-		canModifySpeed = true;
+		GameStateManager.SetIsPause(false);
+		isCanSpawn = true;
+		isCanModifySpeed = true;
 	}
 
 	public float SpeedMultiplier()
@@ -549,7 +549,7 @@ public class LevelSpawnManager : MonoBehaviour
 		GameObject particleObject = particle.gameObject;
 		activeElements.Add(particleObject);
 
-		if (!paused)
+		if (!isPaused)
 		{
 			yield return new WaitForSeconds(2.0f);
 		}
@@ -561,10 +561,10 @@ public class LevelSpawnManager : MonoBehaviour
 	{
 		RandomizeObstacles();
 
-		canSpawn = true;
-		paused = false;
+		isCanSpawn = true;
+		GameStateManager.SetIsPause(false);
 
-		if (!paused)
+		if (!isPaused)
 		{
 			yield return new WaitForSeconds(waitTime);
 		}

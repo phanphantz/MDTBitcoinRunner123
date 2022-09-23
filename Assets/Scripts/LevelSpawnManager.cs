@@ -407,7 +407,7 @@ public class LevelSpawnManager : MonoBehaviour
 		obstacles.Remove(randomObject);
 		activeElements.Add(randomObject);
 
-		randomObject.GetComponent<ObstacleManager>().ActivateChild();
+		randomObject.GetComponent<ObstacleManager>().ActivateAllElements();
 
 		StartCoroutine(StopScrollStartTriggers());
 	}

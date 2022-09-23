@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class ObstacleManager : MonoBehaviour
 {
-	public List<GameObject> elements = new List<GameObject>();
+	public List<GameObject> elementGameObjList = new List<GameObject>();
 
 	void Start()
 	{
@@ -12,18 +12,17 @@ public class ObstacleManager : MonoBehaviour
 		{
 			if (child.name != "SpawnTriggerer" && child.name != "ResetTriggerer")
 			{
-				elements.Add(child.gameObject);
+				elementGameObjList.Add(child.gameObject);
 				child.gameObject.SetActive(false);
 			}
 		}
 	}
 
-	public void DeactivateChild()
+	public void DeactivateAllElements()
 	{
-		foreach (GameObject child in elements)
+		foreach (GameObject child in elementGameObjList)
 		{
 			Transform explosionParticle = child.transform.Find("ExplosionParticle");
-
 			if (explosionParticle != null)
 			{
 				explosionParticle.GetComponent<ParticleSystem>().Stop();
@@ -33,14 +32,14 @@ public class ObstacleManager : MonoBehaviour
 		}
 	}
 
-	public void ActivateChild()
+	public void ActivateAllElements()
 	{
-		foreach (GameObject child in elements)
+		foreach (GameObject child in elementGameObjList)
 		{
 			child.SetActive(true);
-
 			child.GetComponent<Renderer>().enabled = true;
 			child.GetComponent<Collider>().enabled = true;
 		}
 	}
+
 }

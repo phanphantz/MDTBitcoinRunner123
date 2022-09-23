@@ -13,14 +13,14 @@ public class Explosion : MonoBehaviour
 		particleSystem.transform.position = originalPos;
     }
 
-    public void Remove()
+    public void Finish()
     {
         LevelSpawnManager.Instance.RemoveExplosion(particleSystem.gameObject);
         isPlaying = false;
         particleSystem.transform.position = originalPos;
     }
 
-    public void Add(float x, float y)
+    public void PlayAt(float x, float y)
     {
         particleSystem.transform.position = new Vector3(x - 6, y, originalPos.z);
         isPlaying = true;

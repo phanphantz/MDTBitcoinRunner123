@@ -59,12 +59,12 @@ public class Enemy : MonoBehaviour
 
 	IEnumerator PlaceExplosion(float x, float y)
     {
-        explosionComponent.Add(x, y);
+        explosionComponent.PlayAt(x, y);
 
         if (!isPaused)
             yield return new WaitForSeconds(2.0f);
 
-         explosionComponent.Remove();
+         explosionComponent.Finish();
     }
 
     public void Spawn(float s, float minY, float maxY)

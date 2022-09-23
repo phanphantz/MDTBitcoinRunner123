@@ -25,6 +25,9 @@ public class UIManager : MonoBehaviour
 	public Text pauseDailyWord;
 	public Text pauseDistance;
 	public Text pauseTotal;
+
+	[SerializeField] CoinTextData[] coinTextDatas;
+
 	public Text pauseCoin1Count;
 	public Text pauseCoin5Count;
 	public Text pauseCoin10Count;
@@ -33,6 +36,7 @@ public class UIManager : MonoBehaviour
 	public Text pauseCoin100Count;
 	public Button pauseResumeButton;
 	public Text pauseBestDistance;
+
 
 	[Header("Powerup Activate Buttons")]
 	public Button activateSecondChance;
@@ -245,12 +249,11 @@ public class UIManager : MonoBehaviour
 			completedText = PreferencesManager.Instance.GetCompletedWord();
 		}
 		pauseDailyWord.text = completedText;
-		pauseCoin1Count.text = LevelManager.Instance.Coins1().ToString();
-		pauseCoin5Count.text = LevelManager.Instance.Coins5().ToString();
-		pauseCoin10Count.text = LevelManager.Instance.Coins10().ToString();
-		pauseCoin25Count.text = LevelManager.Instance.Coins25().ToString();
-		pauseCoin50Count.text = LevelManager.Instance.Coins50().ToString();
-		pauseCoin100Count.text = LevelManager.Instance.Coins100().ToString();
+
+		foreach(var data in coinTextDatas)
+		{
+			data.coinText.text = LevelManager.Instance.GetCoinCount(data.coinKey).ToString();
+		}
 
 		SoundManager.Instance.UpdateAudioButton();
 

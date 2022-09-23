@@ -131,39 +131,14 @@ public class LevelManager : MonoBehaviour
 		coinParameter = 2;
 	}
 
+	public int GetCoinCount(string key)
+	{
+		return coinDictionary[key];
+	}
+
 	public int Coins()
 	{
 		return coinDictionary["CoinTotal"];
-	}
-
-	public int Coins1()
-	{
-		return coinDictionary["Coin1"];
-	}
-
-	public int Coins5()
-	{
-		return coinDictionary["Coin5"];
-	}
-
-	public int Coins10()
-	{
-		return coinDictionary["Coin10"];
-	}
-
-	public int Coins25()
-	{
-		return coinDictionary["Coin25"];
-	}
-
-	public int Coins50()
-	{
-		return coinDictionary["Coin50"];
-	}
-
-	public int Coins100()
-	{
-		return coinDictionary["Coin100"];
 	}
 
 	public void Restart()

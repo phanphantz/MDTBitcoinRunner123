@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class Powerup : MonoBehaviour
+public class Powerup : OnTriggerReceiver
 {
 	public GameObject trail;
 
@@ -21,7 +21,14 @@ public class Powerup : MonoBehaviour
 
 	void Start()
 	{
+		onTriggerEnter += HandleOnTriggerEnter;
 		startingPos = this.transform.position;
+	}
+
+	void HandleOnTriggerEnter()
+	{
+		PowerupManager.Instance.ResetPowerup(this);
+		ResetObject();
 	}
 
 	void Update()
@@ -39,11 +46,11 @@ public class Powerup : MonoBehaviour
 		}
 	}
 
-	public void Spawn(float vSpeed, float vDist, float hSpeed)
+	public void Spawn(SpawnData data)
 	{
-		this.verticalSpeed = vSpeed;
-		this.verticalDistance = vDist;
-		this.horizontalSpeed = hSpeed;
+		this.verticalSpeed = data.vSpeed;
+		this.verticalDistance = data.vDist;
+		this.horizontalSpeed = data.hSpeed;
 
 		originalYPos = this.transform.position.y;
 
@@ -72,10 +79,8 @@ public class Powerup : MonoBehaviour
 	{
 		canMove = false;
 		trail.SetActive(false);
-
 		this.transform.position = startingPos;
-
 		DisableTrail();
-		PowerupManager.Instance.ResetPowerup(this);
 	}
+	
 }

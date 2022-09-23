@@ -101,7 +101,9 @@ public class PowerupManager : MonoBehaviour
 		powerup.transform.position = newPos;
 
 		activated.Add(powerup);
-		powerup.Spawn(verticalSpeed, verticalDistance, horizontalSpeed * multiplyValue);
+
+		var spawnData = new SpawnData(verticalSpeed, verticalDistance, horizontalSpeed * multiplyValue);
+		powerup.Spawn(spawnData);
 	}
 
 	public void ResetPowerup(Powerup sender)

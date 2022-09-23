@@ -358,7 +358,7 @@ public class UIManager : MonoBehaviour
 	}
 	public void ActivateDoubleBitcoinPowerup()
 	{
-		PlayerManager.Instance.ActivateDoubleBitcoin();
+		PlayerManager.Instance.TryActivateDoubleBitcoin();
 		PreferencesManager.Instance.ModifyPowerup("DoubleBitcoin", -1);
 		activateDoubleBitcoin.gameObject.SetActive(false);
 	}

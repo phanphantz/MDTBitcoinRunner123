@@ -13,12 +13,22 @@ public class Enemy : MonoBehaviour
 	Vector3 originalPos = new Vector3();
 
 	public Explosion explosionComponent;
+	public float explosionDurationInSeconds = 2f;
 	
+	[SerializeField] OnTriggerReceiver onTriggerReceiver;
+
 	void Start()
 	{
+		onTriggerReceiver.onTriggerEnter += ResetObject;
+
 		originalPos = enemyGameObj.transform.position;
 		originalPos.x = UIManager.Instance.cameraHorizontalExtent + 10;
 		enemyGameObj.transform.position = originalPos;
+	}
+
+	void OnDestroy() 
+	{
+		onTriggerReceiver.onTriggerEnter -= ResetObject;
 	}
 
 	void Update()
@@ -57,12 +67,12 @@ public class Enemy : MonoBehaviour
 		canMove = true;
 	}
 
-	IEnumerator PlaceExplosion(float x, float y)
+	IEnumerator PlaceExplosionForSeconds(float x, float y)
     {
         explosionComponent.PlayAt(x, y);
 
         if (!isPaused)
-            yield return new WaitForSeconds(2.0f);
+            yield return new WaitForSeconds(explosionDurationInSeconds);
 
          explosionComponent.Finish();
     }
@@ -73,7 +83,7 @@ public class Enemy : MonoBehaviour
 		StartCoroutine(PlaceEnemyIndicator(minY, maxY));
 	}
 
-	public void ResetObject()
+	void ResetObject()
     {
         StopAllCoroutines();
         explosionComponent.Reset();
@@ -97,7 +107,7 @@ public class Enemy : MonoBehaviour
 
 		if (playExplosion)
 		{
-			StartCoroutine(PlaceExplosion(enemyGameObj.transform.position.x, enemyGameObj.transform.position.y));
+			StartCoroutine(PlaceExplosionForSeconds(enemyGameObj.transform.position.x, enemyGameObj.transform.position.y));
 		}
 
 		enemyGameObj.transform.position = originalPos;

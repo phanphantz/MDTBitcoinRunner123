@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using DG.Tweening;
 
 public class PlayerManager : MonoBehaviour
 {
@@ -87,6 +88,9 @@ public class PlayerManager : MonoBehaviour
     public AudioClip doubleBitcoinAudioEffect;
     public AudioClip coinDroppingAudioEffect;
 
+    [Header("On Hit Obstacle")]
+    [SerializeField] OnHitObstacleEffect onHitObstacleEffectPrefab;
+
     public static PlayerManager Instance
     {
         get
@@ -101,6 +105,7 @@ public class PlayerManager : MonoBehaviour
     }
 
     public Action<CoinInfo> onPickUpCoin;
+    public Action<Transform> onHitEnemy;
 
     private void Awake()
     {
@@ -112,12 +117,26 @@ public class PlayerManager : MonoBehaviour
         instances++;
         WarnAboutInstances();
         SetupPickUpCoinAction();
+        SetupOnHitEnemyAction();
     }
 
     void SetupPickUpCoinAction()
     {
         onPickUpCoin += AddCoinToLevelManager;
         onPickUpCoin += PlayCoinSoundEffect;
+    }
+
+    void SetupOnHitEnemyAction()
+    {
+        onHitEnemy += TryStopPlayerOrDisableShield;
+        onHitEnemy += PlayExplosion;
+        onHitEnemy += SpawnOnHitObstacleEffect;
+    }
+
+    void SpawnOnHitObstacleEffect(Transform obstacleTransform)
+    {
+        var effect = Instantiate(onHitObstacleEffectPrefab , obstacleTransform.position , Quaternion.identity);
+        effect.Spawn();
     }
 
     void WarnAboutInstances()
@@ -341,16 +360,30 @@ public class PlayerManager : MonoBehaviour
 
     private void HitEnemy(Collider other)
     {
-        if (!isFalling && isCanCrash && !isShieldPowerupEnabled)
+        onHitEnemy?.Invoke(other.transform);
+    }
+
+    private void TryStopPlayerOrDisableShield(Transform transform)
+    {
+        if (IsShouldStopPlayer())
         {
             isFalling = true;
             DisablePlayerControls();
+            return;
         }
-        else if (isShieldPowerupEnabled && !isSpeedPowerupEnabled)
-        {
+        
+        if (IsShouldDisableShield())
             StartCoroutine(DisableShield());
-        }
-        PlayExplosion(other.transform);
+    }
+
+    private bool IsShouldStopPlayer()
+    {
+        return !isFalling && isCanCrash && !isShieldPowerupEnabled;
+    }
+
+    private bool IsShouldDisableShield()
+    {
+        return isShieldPowerupEnabled && !isSpeedPowerupEnabled;
     }
 
     private void PickUpLetter(Collider other)

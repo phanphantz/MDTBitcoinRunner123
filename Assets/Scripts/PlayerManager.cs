@@ -100,6 +100,8 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
+    public Action<CoinInfo> onPickUpCoin;
+
     private void Awake()
     {
         Application.targetFrameRate = 30;
@@ -109,6 +111,13 @@ public class PlayerManager : MonoBehaviour
     {
         instances++;
         WarnAboutInstances();
+        SetupPickUpCoinAction();
+    }
+
+    void SetupPickUpCoinAction()
+    {
+        onPickUpCoin += AddCoinToLevelManager;
+        onPickUpCoin += PlayCoinSoundEffect;
     }
 
     void WarnAboutInstances()
@@ -384,12 +393,18 @@ public class PlayerManager : MonoBehaviour
         SetRendererAndColliderDisabled(other);
         other.transform.Find("CoinParticle").gameObject.GetComponent<ParticleSystem>().Play();
         CoinInfo info = other.transform.gameObject.GetComponent<CoinInfo>();
-        if (info != null)
-        {
-            LevelManager.Instance.CoinGathered(info.coinValue);
-        }
+        onPickUpCoin?.Invoke(info);
+    }
 
+    private void PlayCoinSoundEffect(CoinInfo info)
+    {
         AudioSource.PlayClipAtPoint(coinAudioEffect, Vector3.up, SoundManager.Instance.audioVolume);
+    }
+
+    private static void AddCoinToLevelManager(CoinInfo info)
+    {
+        if (info != null)
+            LevelManager.Instance.CoinGathered(info.coinValue);
     }
 
     private void StartSpawnObstacle()

@@ -3,9 +3,9 @@ using System.Collections;
 
 public class InputManager : MonoBehaviour
 {
-    public bool useTouch = false;
-
     public LayerMask mask = -1;
+
+    [SerializeField] InputChecker inputChecker;
 
     Ray ray;
     RaycastHit hit;
@@ -22,21 +22,19 @@ public class InputManager : MonoBehaviour
 
 	private void ListenForScreenCapture()
     {
-        if (Input.GetKey(KeyCode.Z))
+        if (inputChecker.IsTakeScreenshotInput())
             StartCoroutine(CaptureScreenshot());
     }
 
     private void ListenForJump()
     {
-        if (useTouch)
-            GetTouches();
-        else
-            GetClicks();
+        if (inputChecker.IsJumpInput())
+            TryMoveUpByInput(inputChecker.GetJumpInputPosition());
     }
 
 	private void ListenForDash()
 	{
-		if (Input.GetKeyDown(KeyCode.LeftShift))
+		if (inputChecker.IsDashInput())
             Dash();
     }
 
@@ -56,12 +54,6 @@ public class InputManager : MonoBehaviour
     string GetFileName(int width, int height)
     {
         return string.Format("screenshot_{0}x{1}_{2}.png", width, height, System.DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss"));
-    }
-
-    void GetClicks()
-    {
-        if (Input.GetMouseButtonDown(0))
-            TryMoveUpByInput(Input.mousePosition);
     }
 
     void TryMoveUpByInput(Vector3 inputPosition)
@@ -90,23 +82,5 @@ public class InputManager : MonoBehaviour
 		|| PlayerManager.Instance.Crashed())
 		&& !UIManager.Instance.isPausedOrFinished;
     }
-
-    void GetTouches()
-    {
-        foreach (Touch touch in Input.touches)
-            TryMoveUpByTouch(touch);
-    }
-
-    private void TryMoveUpByTouch(Touch touch)
-    {
-        if (IsTouchValid(touch))
-            TryMoveUpByInput(touch.position);
-    }
-
-	bool IsTouchValid(Touch touch)
-	{
-		return touch.phase == TouchPhase.Began 
-		&& touch.phase != TouchPhase.Canceled;
-	}
 
 }

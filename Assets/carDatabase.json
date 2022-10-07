@@ -1,0 +1,30 @@
+[
+    {
+        "name" : "Car",
+        "minY" : -16
+    }, 
+    {
+        "name" : "Bus",
+        "minY" : -9
+    }, 
+    {
+        "name" : "Tank",
+        "minY" : -13
+    }, 
+    {
+        "name" : "Jeep",
+        "minY" : -20
+    }, 
+    {
+        "name" : "Tesla",
+        "minY" : -20
+    }, 
+    {
+        "name" : "F1",
+        "minY" : -20
+    }, 
+    {
+        "name" : "Saleng",
+        "minY" : -20
+    }
+]

@@ -3,24 +3,13 @@ using System.Collections;
 
 public class GroundChecker : MonoBehaviour
 {
-	public string carName;
-	public string busName;
-	public string tankName;
-	public string jeepName;
-
-	[SerializeField] CarData[] cars;
-	[SerializeField] CarData defaultData;
-
+	[SerializeField] CarDatabase carDatabase;
+	
 	void OnTriggerStay(Collider other)
 	{
-		foreach(var carData in cars)
-		{
-			if (other.transform.name.Contains(carData.name))
-            {
-                ApplyCarDataToPlayer(carData);
-				break;
-            }
-        }
+		var matchedCarData = carDatabase.GetCarDataByName(other.transform.name);
+		if (matchedCarData != null)
+			ApplyCarDataToPlayer(matchedCarData);
 	}
 
     private static void ApplyCarDataToPlayer(CarData carData)
@@ -32,7 +21,7 @@ public class GroundChecker : MonoBehaviour
 
     void OnTriggerExit(Collider collision)
 	{
-		ApplyCarDataToPlayer(defaultData);
+		ApplyCarDataToPlayer(carDatabase.GetDefaultData());
 	}
 
 }

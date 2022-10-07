@@ -25,6 +25,11 @@ public class Powerup : OnTriggerReceiver
 		startingPos = this.transform.position;
 	}
 
+	private void OnDestroy() 
+	{
+		onTriggerEnter -= HandleOnTriggerEnter;
+	}
+
 	void HandleOnTriggerEnter()
 	{
 		PowerupManager.Instance.ResetPowerup(this);

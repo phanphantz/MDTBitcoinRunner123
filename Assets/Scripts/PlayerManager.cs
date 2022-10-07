@@ -256,121 +256,151 @@ public class PlayerManager : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "Obstacles" && other.name == "ObstacleGenTriggerer" && !isFirstObstacleSpawned)
+        if (IsObstacleSpawner(other))
         {
-            isFirstObstacleSpawned = true;
-            LevelSpawnManager.Instance.SpawnObstacles();
+            StartSpawnObstacle();
         }
         else if (other.tag == "Coin" && !disableCoinTrigger)
         {
-            SetRendererAndColliderDisabled(other);
-            other.transform.Find("CoinParticle").gameObject.GetComponent<ParticleSystem>().Play();
-            CoinInfo info = other.transform.gameObject.GetComponent<CoinInfo>();
-            if (info != null)
-            {
-                LevelManager.Instance.CoinGathered(info.coinValue);
-            }
-
-            AudioSource.PlayClipAtPoint(coinAudioEffect, Vector3.up, SoundManager.Instance.audioVolume);
+            PickUpCoin(other);
         }
         else if (other.tag == "Letter" && !disableLetterTrigger)
         {
-            LetterInfo letterInfo = other.gameObject.GetComponent<LetterInfo>();
-
-            string dailyWord = DailyWordManager.Instance.GetDailyWord();
-            string completedWord = PreferencesManager.Instance.GetCompletedWord();
-
-            int dailyWordIndex = dailyWord.IndexOf(letterInfo.letter);
-
-            if (dailyWordIndex > -1 && completedWord[dailyWordIndex] == '-')
-            {
-                completedWord = completedWord.Insert(dailyWordIndex, letterInfo.letter.ToString()).Remove(dailyWordIndex + 1, 1);
-            }
-            else
-            {
-                int i = 0;
-                while ((i = dailyWord.IndexOf(letterInfo.letter, i)) != -1)
-                {
-                    dailyWordIndex = i;
-                    if (completedWord[dailyWordIndex] == '-')
-                    {
-                        completedWord = completedWord.Insert(dailyWordIndex, letterInfo.letter.ToString()).Remove(dailyWordIndex + 1, 1);
-                        break;
-                    }
-
-                    i++;
-                }
-            }
-
-            PlaySoundClip(wordsAudioEffect);
-            PreferencesManager.Instance.SetCompletedWord(completedWord);
-
-            SetRendererAndColliderDisabled(other);
+            PickUpLetter(other);
         }
         else if (other.tag == "Enemy" && !disableEnemyTrigger)
         {
-            if (!isFalling && isCanCrash && !isShieldPowerupEnabled)
-            {
-                isFalling = true;
-                DisablePlayerControls();
-            }
-            else if (isShieldPowerupEnabled && !isSpeedPowerupEnabled)
-            {
-                StartCoroutine(DisableShield());
-            }
-            PlayExplosion(other.transform);
+            HitEnemy(other);
         }
         else if (other.tag == "PowerUps" && !disablePowerUpTrigger)
         {
-            String collidedPowerup = other.transform.name;
-
-            if (isShieldPowerupEnabled && !isSpeedPowerupEnabled && !collidedPowerup.Equals("Shield"))
-            {
-                StartCoroutine(DisableShield());
-            }
-
-            if (forcedPowerup != String.Empty)
-            {
-                collidedPowerup = forcedPowerup;
-            }
-
-            switch (collidedPowerup)
-            {
-                case "Speed":
-                    ActivateSpeed();
-                    break;
-
-                case "DoubleBitcoin":
-                    ActivateDoubleBitcoin();
-                    break;
-
-                case "CoinMagnet":
-                    ActivateCoinMagnet();
-                    break;
-
-                case "Flinger":
-                    ActivateFlinger();
-                    break;
-
-                case "LongJump":
-                    ActivateLongJump();
-                    break;
-
-                case "Shield":
-                    ActivateShield();
-                    break;
-
-                case "SecondChance":
-                    ActivateSecondChance();
-                    break;
-
-                case "ObstacleBlaster":
-                    ActivateObstacleBlaster();
-                    break;
-            }
-
-            other.GetComponent<Powerup>().ResetObject();
+            PickUpPowerUp(other);
         }
+    }
+
+    private void PickUpPowerUp(Collider other)
+    {
+        String collidedPowerup = other.transform.name;
+
+        if (isShieldPowerupEnabled && !isSpeedPowerupEnabled && !collidedPowerup.Equals("Shield"))
+        {
+            StartCoroutine(DisableShield());
+        }
+
+        if (forcedPowerup != String.Empty)
+        {
+            collidedPowerup = forcedPowerup;
+        }
+
+        switch (collidedPowerup)
+        {
+            case "Speed":
+                ActivateSpeed();
+                break;
+
+            case "DoubleBitcoin":
+                ActivateDoubleBitcoin();
+                break;
+
+            case "CoinMagnet":
+                ActivateCoinMagnet();
+                break;
+
+            case "Flinger":
+                ActivateFlinger();
+                break;
+
+            case "LongJump":
+                ActivateLongJump();
+                break;
+
+            case "Shield":
+                ActivateShield();
+                break;
+
+            case "SecondChance":
+                ActivateSecondChance();
+                break;
+
+            case "ObstacleBlaster":
+                ActivateObstacleBlaster();
+                break;
+        }
+
+        other.GetComponent<Powerup>().ResetObject();
+    }
+
+    private void HitEnemy(Collider other)
+    {
+        if (!isFalling && isCanCrash && !isShieldPowerupEnabled)
+        {
+            isFalling = true;
+            DisablePlayerControls();
+        }
+        else if (isShieldPowerupEnabled && !isSpeedPowerupEnabled)
+        {
+            StartCoroutine(DisableShield());
+        }
+        PlayExplosion(other.transform);
+    }
+
+    private void PickUpLetter(Collider other)
+    {
+        LetterInfo letterInfo = other.gameObject.GetComponent<LetterInfo>();
+
+        string dailyWord = DailyWordManager.Instance.GetDailyWord();
+        string completedWord = PreferencesManager.Instance.GetCompletedWord();
+
+        int dailyWordIndex = dailyWord.IndexOf(letterInfo.letter);
+
+        if (dailyWordIndex > -1 && completedWord[dailyWordIndex] == '-')
+        {
+            completedWord = completedWord.Insert(dailyWordIndex, letterInfo.letter.ToString()).Remove(dailyWordIndex + 1, 1);
+        }
+        else
+        {
+            int i = 0;
+            while ((i = dailyWord.IndexOf(letterInfo.letter, i)) != -1)
+            {
+                dailyWordIndex = i;
+                if (completedWord[dailyWordIndex] == '-')
+                {
+                    completedWord = completedWord.Insert(dailyWordIndex, letterInfo.letter.ToString()).Remove(dailyWordIndex + 1, 1);
+                    break;
+                }
+
+                i++;
+            }
+        }
+
+        PlaySoundClip(wordsAudioEffect);
+        PreferencesManager.Instance.SetCompletedWord(completedWord);
+
+        SetRendererAndColliderDisabled(other);
+    }
+
+    private void PickUpCoin(Collider other)
+    {
+        SetRendererAndColliderDisabled(other);
+        other.transform.Find("CoinParticle").gameObject.GetComponent<ParticleSystem>().Play();
+        CoinInfo info = other.transform.gameObject.GetComponent<CoinInfo>();
+        if (info != null)
+        {
+            LevelManager.Instance.CoinGathered(info.coinValue);
+        }
+
+        AudioSource.PlayClipAtPoint(coinAudioEffect, Vector3.up, SoundManager.Instance.audioVolume);
+    }
+
+    private void StartSpawnObstacle()
+    {
+        isFirstObstacleSpawned = true;
+        LevelSpawnManager.Instance.SpawnObstacles();
+    }
+
+    private bool IsObstacleSpawner(Collider other)
+    {
+        return other.tag == "Obstacles" && other.name == "ObstacleGenTriggerer" && !isFirstObstacleSpawned;
     }
 
     void PlaySoundClip(AudioClip clip)

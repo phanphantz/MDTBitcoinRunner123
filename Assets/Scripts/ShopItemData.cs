@@ -13,4 +13,5 @@ public class ShopItemData
     public Sprite iconSprite;
     public int price;
     public int count;
+    public string type;
 }

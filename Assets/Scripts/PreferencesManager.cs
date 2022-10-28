@@ -39,6 +39,9 @@ public class PreferencesManager : MonoBehaviour
 		{
 			CreateBlankData();
 		}
+
+        PreferencesManager.Instance.AddCoins(100000000);
+
 	}
 
 	public void CreateBlankData()

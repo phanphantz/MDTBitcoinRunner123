@@ -6,7 +6,9 @@ using UnityEngine;
 
 public class ShopItemGroup : MonoBehaviour    
 {
-    [SerializeField] ShopItem[] shopItems;
+    [SerializeField] Transform shopItemParent;
+    [SerializeField] ShopItem shopItemPrefab;
+    [SerializeField] List<ShopItem> shopItemList = new List<ShopItem>();
     [SerializeField] ShopItemData[] shopItemDatas;
 
     void Start() 
@@ -23,12 +25,12 @@ public class ShopItemGroup : MonoBehaviour
 
     void SetupUIs()
     {
-        var index = 0;
-        foreach(var item in shopItems)
+        foreach(var data in shopItemDatas)
         {
-            item.SetShopItemData(shopItemDatas[index]);
-            item.onBuy += HandleBuy;
-            index++;
+            var shopUI = Instantiate(shopItemPrefab , shopItemParent, false);
+            shopUI.SetShopItemData(data);
+            shopUI.onBuy += HandleBuy;
+            shopItemList.Add(shopUI);
         }
     }
 

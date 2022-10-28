@@ -7,7 +7,20 @@ using UnityEngine.UI;
 
 public class ShopItemGroup : ShopGroupGen<ShopItemData>  
 {
-    
+    private void Update() 
+    {
+        var index = 0;
+        foreach(var data in datas)
+        {
+            if (data.delayTimeSpan.TotalSeconds > 0)
+                data.delayTimeSpan -= TimeSpan.FromSeconds(Time.deltaTime);
+
+            uiItemList[index].SetItemData(data);
+            index++;
+        }
+         
+    }
+
     protected override void Refresh()
     {
         PrepareShopItemDatas();
@@ -32,9 +45,13 @@ public class ShopItemGroup : ShopGroupGen<ShopItemData>
  
     protected override void HandleBuy(ShopItemData itemData)
     {
+        if (itemData.delayTimeSpan.TotalSeconds > 0)
+            return;
+
         if (PreferencesManager.Instance.GetCoins() < itemData.price)
             return;
 
+        itemData.AddDelay(new TimeSpan( 1, 0 , 0 ,0));
 		PreferencesManager.Instance.AddCoins(-itemData.price);
 		PreferencesManager.Instance.ModifyPowerup(itemData.itemName, 1);
 		UIManager.Instance.UpdateMenuCoinCounts();

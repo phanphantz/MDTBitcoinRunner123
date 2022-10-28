@@ -14,4 +14,11 @@ public class ShopItemData
     public int price;
     public int count;
     public string type;
+    public TimeSpan delayTimeSpan;
+
+    public void AddDelay(TimeSpan delay)
+    {
+        delayTimeSpan = delay;
+    }
+
 }

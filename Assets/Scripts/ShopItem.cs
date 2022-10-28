@@ -7,8 +7,7 @@ public class ShopItem : MonoBehaviour
 {
 	public Text itemCountText;
 	public Text itemPriceText;
-	public int itemPrice;
-	public string itemName;
+	[SerializeField] ShopItemData itemData;
 
 	void Start()
 	{
@@ -17,16 +16,18 @@ public class ShopItem : MonoBehaviour
 
 	void UpdateShopItem()
 	{
-		itemPriceText.text = (((float)itemPrice) / 100.0f).ToString("0.00");
-		itemCountText.text = "x " + PreferencesManager.Instance.GetPowerup(itemName);
+		// Display Data
+		itemPriceText.text = (((float)itemData.price) / 100.0f).ToString("0.00");
+		itemCountText.text = "x " + itemData.count; //Get Data
+		//PreferencesManager.Instance.GetPowerup(itemName)
 	}
 
 	public void BuyPowerup()
 	{
-		if (PreferencesManager.Instance.GetCoins() >= itemPrice)
+		if (PreferencesManager.Instance.GetCoins() >= itemData.price)
 		{
-			PreferencesManager.Instance.AddCoins(-itemPrice);
-			PreferencesManager.Instance.ModifyPowerup(itemName, 1);
+			PreferencesManager.Instance.AddCoins(-itemData.price);
+			PreferencesManager.Instance.ModifyPowerup(itemData.itemName, 1); //Modify Data
 			UpdateShopItem();
 			UIManager.Instance.UpdateMenuCoinCounts();
 			FirebaseEventManager.Instance.SendSpendVirtualCurrency();

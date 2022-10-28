@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,30 +8,25 @@ public class ShopItem : MonoBehaviour
 {
 	public Text itemCountText;
 	public Text itemPriceText;
-	[SerializeField] ShopItemData itemData;
+	ShopItemData itemData;
 
-	void Start()
+	public Action<ShopItemData> onBuy;
+
+	public void SetShopItemData(ShopItemData data)
 	{
-		UpdateShopItem();
+		itemData = data;
+		UpdateDisplay();
 	}
 
-	void UpdateShopItem()
+	void UpdateDisplay()
 	{
-		// Display Data
 		itemPriceText.text = (((float)itemData.price) / 100.0f).ToString("0.00");
-		itemCountText.text = "x " + itemData.count; //Get Data
-		//PreferencesManager.Instance.GetPowerup(itemName)
+		itemCountText.text = "x " + itemData.count; 
 	}
 
 	public void BuyPowerup()
 	{
-		if (PreferencesManager.Instance.GetCoins() >= itemData.price)
-		{
-			PreferencesManager.Instance.AddCoins(-itemData.price);
-			PreferencesManager.Instance.ModifyPowerup(itemData.itemName, 1); //Modify Data
-			UpdateShopItem();
-			UIManager.Instance.UpdateMenuCoinCounts();
-			FirebaseEventManager.Instance.SendSpendVirtualCurrency();
-		}
+		onBuy?.Invoke(itemData);
 	}
+
 }
